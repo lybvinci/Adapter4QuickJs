@@ -78,7 +78,7 @@ int loadjs() {
 
     if (eval_buf(ctx, expr, strlen(expr), "<cmdline>", 0))
         goto fail;
-    js_std_loop(ctx);
+//    js_std_loop(ctx);
 
     js_std_free_handlers(rt);
     JS_FreeContext(ctx);
