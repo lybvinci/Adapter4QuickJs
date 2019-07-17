@@ -5,12 +5,12 @@ extern "C" {
 #include <quickjs-libc.h>
 
 #include "./quickjs/quickjs.h"
-#include "./quickjs/quickjs-libc.h"
+//#include "./quickjs/quickjs-libc.h"
 #include "./quickjs/cutils.h"
 
 static JSValue testlog(JSContext *ctx, JSValueConst this_val,
                        int argc, JSValueConst *argv) {
-    __android_log_print(ANDROID_LOG_ERROR, "lyb", "testlog");
+    __android_log_print(ANDROID_LOG_ERROR, "lyb123456", "testlog");
     return JS_UNDEFINED;
 }
 
@@ -21,7 +21,7 @@ static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
 
     val = JS_Eval(ctx, buf, buf_len, filename, eval_flags);
     if (JS_IsException(val)) {
-        js_std_dump_error(ctx);
+//        js_std_dump_error(ctx);
         ret = -1;
     } else {
         ret = 0;
@@ -35,7 +35,7 @@ static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
 int loadjs() {
     JSRuntime *rt;
     JSContext *ctx;
-    char *expr = "var test=1111; console.log(\"lyb\", test); print(test);testlogobj.testlog(1);";
+    char *expr = "var test=111;testlogobj.testlog(1);";
 
     rt = JS_NewRuntime();
     if (!rt) {
@@ -51,9 +51,9 @@ int loadjs() {
     }
 
     /* loader for ES6 modules */
-    JS_SetModuleLoaderFunc(rt, NULL, js_module_loader, NULL);
+//    JS_SetModuleLoaderFunc(rt, NULL, js_module_loader, NULL);
 
-    js_std_add_helpers(ctx, 0, 0);
+//    js_std_add_helpers(ctx, 0, 0);
 
 
     // add obj to global function.
@@ -80,12 +80,12 @@ int loadjs() {
         goto fail;
 //    js_std_loop(ctx);
 
-    js_std_free_handlers(rt);
+//    js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
     return 0;
     fail:
-    js_std_free_handlers(rt);
+//    js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
     return 1;

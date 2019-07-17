@@ -44,13 +44,13 @@ include_directories(
 
 SET(QuickJsSrc
         ${QuickJs}/cutils.c
-        ${QuickJs}/jscompress.c
-        ${QuickJs}/libbf.c
         ${QuickJs}/libregexp.c
         ${QuickJs}/libunicode.c
         ${QuickJs}/quickjs.c
-        ${QuickJs}/quickjs-libc.c
-        ${QuickJs}/unicode_gen.c
+#        ${QuickJs}/jscompress.c
+#        ${QuickJs}/libbf.c
+#        ${QuickJs}/quickjs-libc.c
+#        ${QuickJs}/unicode_gen.c
         )
 add_definitions(-D CONFIG_VERSION="\\"2019-07-09\\"")
 add_definitions(-D JS_SHARED_LIBRARY)
