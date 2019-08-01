@@ -15,8 +15,6 @@ set(CMAKE_CXX_FLAGS
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
-
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-rtti")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,libgcc.a -Wl,--exclude-libs,libunwind.a")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--exclude-libs,ALL,--gc-sections")
@@ -25,9 +23,26 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} j,--exclude-libs,ALL,--gc-
 ## remove redundant sections
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections -funwind-tables -fno-short-enums ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections -funwind-tables -fno-short-enums")
-## can used to strip so, trim so
-## only can use on release
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
+
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+
+    add_definitions(-DNDEBUG)
+
+    MESSAGE("Build Release Version " ${ANDROID_ABI})
+
+    # can used to strip so, trim so
+    # only can use on release
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -s")
+
+else () # end release
+
+    MESSAGE("Build Debug Version " ${ANDROID_ABI})
+
+    # memory debug
+    add_definitions(-DDEBUG_MEMORY)
+
+endif ()  #end debug
+
 
 
 SET(QuickJs "quickjs")
@@ -36,34 +51,33 @@ include_directories(
         .
 )
 
-
-
-
-
-
-
 SET(QuickJsSrc
         ${QuickJs}/cutils.c
         ${QuickJs}/libregexp.c
         ${QuickJs}/libunicode.c
         ${QuickJs}/quickjs.c
+        # no need
 #        ${QuickJs}/jscompress.c
 #        ${QuickJs}/libbf.c
 #        ${QuickJs}/quickjs-libc.c
 #        ${QuickJs}/unicode_gen.c
+#        ${QuickJs}/run-test262.c
+#        ${QuickJs}/qjs.c
+#        ${QuickJs}/qjsc.c
         )
-add_definitions(-D CONFIG_VERSION="\\"2019-07-09\\"")
+add_definitions(-D CONFIG_VERSION="\\"2019-07-21\\"")
 add_definitions(-D JS_SHARED_LIBRARY)
 
 add_library( # Sets the name of the library.
-        native-lib
+        quickjs
 
         # Sets the library as a shared library.
         SHARED
 
         ${QuickJsSrc}
         # Provides a relative path to your source file(s).
-        native-lib.cpp)
+#        native-lib.cpp
+        )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -83,7 +97,7 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-        native-lib
+        quickjs
 
         # Links the target library to the log library
         # included in the NDK.

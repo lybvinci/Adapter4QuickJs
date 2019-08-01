@@ -1,18 +1,17 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAGLYB", __VA_ARGS__);
 extern "C" {
-#include <quickjs-libc.h>
-
 #include "./quickjs/quickjs.h"
-//#include "./quickjs/quickjs-libc.h"
+#include "./quickjs/quickjs-libc.h"
 #include "./quickjs/cutils.h"
 
-static JSValue testlog(JSContext *ctx, JSValueConst this_val,
-                       int argc, JSValueConst *argv) {
-    __android_log_print(ANDROID_LOG_ERROR, "lyb123456", "testlog");
-    return JS_UNDEFINED;
-}
+//static JSValue testlog(JSContext *ctx, JSValueConst this_val,
+//                       int argc, JSValueConst *argv) {
+//    __android_log_print(ANDROID_LOG_ERROR, "lyb123456", "testlog");
+//    return JS_UNDEFINED;
+//}
 
 static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
                     const char *filename, int eval_flags) {
@@ -21,11 +20,12 @@ static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
 
     val = JS_Eval(ctx, buf, buf_len, filename, eval_flags);
     if (JS_IsException(val)) {
-//        js_std_dump_error(ctx);
+        js_std_dump_error(ctx);
         ret = -1;
     } else {
         ret = 0;
     }
+    __android_log_print(ANDROID_LOG_ERROR, "lyb","eval_buf=%d", ret);
     JS_FreeValue(ctx, val);
     return ret;
 }
@@ -33,9 +33,19 @@ static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
 
 
 int loadjs() {
+
+//  for (int i = 0; i < INT_MAX; ++i) {
+//    int* aa = (int*) malloc(sizeof(int) * 3);
+//    if (((intptr_t )aa) > 0) {
+////      __android_log_print(ANDROID_LOG_ERROR, "lyb123", "1");
+//    }else {
+//      __android_log_print(ANDROID_LOG_ERROR, "lyb123", "0");
+//    }
+//  }
     JSRuntime *rt;
     JSContext *ctx;
-    char *expr = "var test=111;testlogobj.testlog(1);";
+//    char *expr = "var test=111;testlogobj.testlog(1);";
+  const char* expr = "var t = '*WARN*,*ERROR*'.split(/[\\s,]+/); console.log(t[0]);";
 
     rt = JS_NewRuntime();
     if (!rt) {
@@ -53,18 +63,28 @@ int loadjs() {
     /* loader for ES6 modules */
 //    JS_SetModuleLoaderFunc(rt, NULL, js_module_loader, NULL);
 
-//    js_std_add_helpers(ctx, 0, 0);
+    js_std_add_helpers(ctx, 0, 0);
 
 
     // add obj to global function.
-    JSValue global_obj, testconsole;
-    global_obj = JS_GetGlobalObject(ctx);
-    testconsole = JS_NewObject(ctx);
-    JS_SetPropertyStr(ctx, testconsole, "testlog",
-                      JS_NewCFunction(ctx, testlog, "testlog1", 1));
-    JS_SetPropertyStr(ctx, global_obj, "testlogobj", testconsole);
-    JS_FreeValue(ctx, global_obj);
+//    JSValue global_obj, testconsole;
+//    global_obj = JS_GetGlobalObject(ctx);
+//    testconsole = JS_NewObject(ctx);
+//    JS_SetPropertyStr(ctx, testconsole, "testlog",
+//                      JS_NewCFunction(ctx, testlog, "testlog1", 1));
+//    JS_SetPropertyStr(ctx, global_obj, "testlogobj", testconsole);
+//    JS_FreeValue(ctx, global_obj);
 
+
+//    const JSClassDef js_class_def = {
+//            "classDef",
+//    };
+//    JSClassID jid;
+//    JS_NewClassID(&jid);
+//  __android_log_print(ANDROID_LOG_ERROR, "ttt", "jid = %d", jid);
+//    JS_NewClass(JS_GetRuntime(ctx), jid, &js_class_def);
+//    JSValue obj = JS_NewObjectClass(ctx, jid);
+//    JS_FreeValue(ctx, obj);
 
 
     /* system modules */
@@ -78,6 +98,7 @@ int loadjs() {
 
     if (eval_buf(ctx, expr, strlen(expr), "<cmdline>", 0))
         goto fail;
+
 //    js_std_loop(ctx);
 
 //    js_std_free_handlers(rt);
@@ -91,8 +112,9 @@ int loadjs() {
     return 1;
 }
 
-
 }
+
+//}
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_lybvinci_adapter4quickjs_MainActivity_stringFromJNI(

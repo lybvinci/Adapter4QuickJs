@@ -6,25 +6,31 @@ android {
     defaultConfig {
         applicationId "com.lybvinci.adapter4quickjs"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++14"
+                cppFlags "-std=c++11"
+                arguments '-DANDROID_PLATFORM=android-19',
+                        '-DANDROID_TOOLCHAIN=clang',
+                        '-DANDROID_STL=c++_shared',
+                        '-LH'//显示编译参数
             }
         }
     }
     buildTypes {
         debug {
             ndk {
-                abiFilters 'armeabi-v7a', 'x86'
+                abiFilters  'armeabi-v7a', 'x86'
             }
+            jniDebuggable true
+            debuggable true
         }
         release {
             ndk {
-                abiFilters 'armeabi-v7a', 'x86'
+                abiFilters  'armeabi-v7a', 'x86'
             }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

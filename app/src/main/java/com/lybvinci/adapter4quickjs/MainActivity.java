@@ -9,7 +9,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("quickjs");
     }
 
     @Override
@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = findViewById(R.id.sample_text);
         tv.setText(stringFromJNI());
     }
+
 
     /**
      * A native method that is implemented by the 'native-lib' native library,

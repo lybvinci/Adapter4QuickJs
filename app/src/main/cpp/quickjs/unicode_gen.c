@@ -2954,104 +2954,103 @@ void normalization_test(const char *filename)
 }
 #endif
 
-// TODO liyanbo
-//int main(int argc, char **argv)
-//{
-//    const char *unicode_db_path, *outfilename;
-//    char filename[1024];
-//
-//    if (argc < 2) {
-//        printf("usage: %s unicode_db_path [output_file]\n"
-//               "\n"
-//               "If no output_file is given, a self test is done using the current unicode library\n",
-//               argv[0]);
-//        exit(1);
-//    }
-//    unicode_db_path = argv[1];
-//    outfilename = NULL;
-//    if (argc >= 3)
-//        outfilename = argv[2];
-//
-//    unicode_db = mallocz(sizeof(unicode_db[0]) * (CHARCODE_MAX + 1));
-//
-//    snprintf(filename, sizeof(filename), "%s/UnicodeData.txt", unicode_db_path);
-//
-//    parse_unicode_data(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/SpecialCasing.txt", unicode_db_path);
-//    parse_special_casing(unicode_db, filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/CaseFolding.txt", unicode_db_path);
-//    parse_case_folding(unicode_db, filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/CompositionExclusions.txt", unicode_db_path);
-//    parse_composition_exclusions(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/DerivedCoreProperties.txt", unicode_db_path);
-//    parse_derived_core_properties(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/DerivedNormalizationProps.txt", unicode_db_path);
-//    parse_derived_norm_properties(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/PropList.txt", unicode_db_path);
-//    parse_prop_list(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/Scripts.txt", unicode_db_path);
-//    parse_scripts(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/ScriptExtensions.txt",
-//             unicode_db_path);
-//    parse_script_extensions(filename);
-//
-//    snprintf(filename, sizeof(filename), "%s/emoji-data.txt",
-//             unicode_db_path);
-//    parse_prop_list(filename);
-//
-//    //    dump_data(unicode_db);
-//
-//    build_conv_table(unicode_db);
-//
-//    //    dump_table();
-//
-//    if (!outfilename) {
-//#ifdef USE_TEST
-//        check_case_conv();
-//        check_flags();
-//        check_decompose_table();
-//        check_compose_table();
-//        check_cc_table();
-//        snprintf(filename, sizeof(filename), "%s/NormalizationTest.txt", unicode_db_path);
-//        normalization_test(filename);
-//#else
-//        fprintf(stderr, "Tests are not compiled\n");
-//        exit(1);
-//#endif
-//    } else
-//    {
-//        FILE *fo = fopen(outfilename, "wb");
-//
-//        if (!fo) {
-//            perror(outfilename);
-//            exit(1);
-//        }
-//        fprintf(fo,
-//                "/* Compressed unicode tables */\n"
-//                "/* Automatically generated file - do not edit */\n"
-//                "\n"
-//                "#include <stdint.h>\n"
-//                "\n");
-//        dump_case_conv_table(fo);
-//        compute_internal_props();
-//        build_flags_tables(fo);
-//        fprintf(fo, "#ifdef CONFIG_ALL_UNICODE\n\n");
-//        build_cc_table(fo);
-//        build_decompose_table(fo);
-//        build_general_category_table(fo);
-//        build_script_table(fo);
-//        build_script_ext_table(fo);
-//        build_prop_list_table(fo);
-//        fprintf(fo, "#endif /* CONFIG_ALL_UNICODE */\n");
-//        fclose(fo);
-//    }
-//    return 0;
-//}
+int main(int argc, char **argv)
+{
+    const char *unicode_db_path, *outfilename;
+    char filename[1024];
+    
+    if (argc < 2) {
+        printf("usage: %s unicode_db_path [output_file]\n"
+               "\n"
+               "If no output_file is given, a self test is done using the current unicode library\n",
+               argv[0]);
+        exit(1);
+    }
+    unicode_db_path = argv[1];
+    outfilename = NULL;
+    if (argc >= 3)
+        outfilename = argv[2];
+
+    unicode_db = mallocz(sizeof(unicode_db[0]) * (CHARCODE_MAX + 1));
+
+    snprintf(filename, sizeof(filename), "%s/UnicodeData.txt", unicode_db_path);
+
+    parse_unicode_data(filename);
+
+    snprintf(filename, sizeof(filename), "%s/SpecialCasing.txt", unicode_db_path);
+    parse_special_casing(unicode_db, filename);
+    
+    snprintf(filename, sizeof(filename), "%s/CaseFolding.txt", unicode_db_path);
+    parse_case_folding(unicode_db, filename);
+
+    snprintf(filename, sizeof(filename), "%s/CompositionExclusions.txt", unicode_db_path);
+    parse_composition_exclusions(filename);
+    
+    snprintf(filename, sizeof(filename), "%s/DerivedCoreProperties.txt", unicode_db_path);
+    parse_derived_core_properties(filename);
+
+    snprintf(filename, sizeof(filename), "%s/DerivedNormalizationProps.txt", unicode_db_path);
+    parse_derived_norm_properties(filename);
+
+    snprintf(filename, sizeof(filename), "%s/PropList.txt", unicode_db_path);
+    parse_prop_list(filename);
+
+    snprintf(filename, sizeof(filename), "%s/Scripts.txt", unicode_db_path);
+    parse_scripts(filename);
+
+    snprintf(filename, sizeof(filename), "%s/ScriptExtensions.txt",
+             unicode_db_path);
+    parse_script_extensions(filename);
+                        
+    snprintf(filename, sizeof(filename), "%s/emoji-data.txt",
+             unicode_db_path);
+    parse_prop_list(filename);
+
+    //    dump_data(unicode_db);
+
+    build_conv_table(unicode_db);
+    
+    //    dump_table();
+
+    if (!outfilename) {
+#ifdef USE_TEST
+        check_case_conv();
+        check_flags();
+        check_decompose_table();
+        check_compose_table();
+        check_cc_table();
+        snprintf(filename, sizeof(filename), "%s/NormalizationTest.txt", unicode_db_path);
+        normalization_test(filename);
+#else
+        fprintf(stderr, "Tests are not compiled\n");
+        exit(1);
+#endif
+    } else
+    {
+        FILE *fo = fopen(outfilename, "wb");
+        
+        if (!fo) {
+            perror(outfilename);
+            exit(1);
+        }
+        fprintf(fo,
+                "/* Compressed unicode tables */\n"
+                "/* Automatically generated file - do not edit */\n"
+                "\n"
+                "#include <stdint.h>\n"
+                "\n");
+        dump_case_conv_table(fo);
+        compute_internal_props();
+        build_flags_tables(fo);
+        fprintf(fo, "#ifdef CONFIG_ALL_UNICODE\n\n");
+        build_cc_table(fo);
+        build_decompose_table(fo);
+        build_general_category_table(fo);
+        build_script_table(fo);
+        build_script_ext_table(fo);
+        build_prop_list_table(fo);
+        fprintf(fo, "#endif /* CONFIG_ALL_UNICODE */\n");
+        fclose(fo);
+    }
+    return 0;
+}
