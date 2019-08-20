@@ -45,7 +45,8 @@ int loadjs() {
     JSRuntime *rt;
     JSContext *ctx;
 //    char *expr = "var test=111;testlogobj.testlog(1);";
-  const char* expr = "var t = '*WARN*,*ERROR*'.split(/[\\s,]+/); console.log(t[0]);";
+  //const char* expr = "var t = '*WARN*,*ERROR*'.split(/[\\s,]+/); console.log(t[0]);";
+  const char* expr = "var t = 'test';";
 
     rt = JS_NewRuntime();
     if (!rt) {
@@ -109,6 +110,7 @@ int loadjs() {
 //    js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
+
     return 1;
 }
 

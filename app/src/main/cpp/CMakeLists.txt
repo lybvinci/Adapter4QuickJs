@@ -67,6 +67,7 @@ SET(QuickJsSrc
         )
 add_definitions(-D CONFIG_VERSION="\\"2019-07-21\\"")
 add_definitions(-D JS_SHARED_LIBRARY)
+#add_definitions(-D EMSCRIPTEN)
 
 add_library( # Sets the name of the library.
         quickjs
