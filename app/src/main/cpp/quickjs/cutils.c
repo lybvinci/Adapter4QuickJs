@@ -95,10 +95,12 @@ void dbuf_init2(DynBuf *s, void *opaque, DynBufReallocFunc *realloc_func)
     s->realloc_func = realloc_func;
 }
 
+#ifndef LYNX_SIMPLIFY
 void dbuf_init(DynBuf *s)
 {
     dbuf_init2(s, NULL, NULL);
 }
+#endif
 
 /* return < 0 if error */
 int dbuf_realloc(DynBuf *s, size_t new_size)

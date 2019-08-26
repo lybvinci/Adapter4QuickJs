@@ -49,7 +49,7 @@ typedef sig_t sighandler_t;
 #include "cutils.h"
 #include "list.h"
 #include "quickjs-libc.h"
-
+#ifndef LYNX_SIMPLIFY
 static void js_std_dbuf_init(JSContext *ctx, DynBuf *s)
 {
     dbuf_init2(s, JS_GetRuntime(ctx), (DynBufReallocFunc *)js_realloc_rt);
@@ -72,6 +72,7 @@ typedef struct {
     int sig_num;
     JSValue func;
 } JSOSSignalHandler;
+#endif
 
 typedef struct {
     struct list_head link;
@@ -81,13 +82,19 @@ typedef struct {
 } JSOSTimer;
 
 /* initialize the lists so js_std_free_handlers() can always be called */
+#ifndef LYNX_SIMPLIFY
 static struct list_head os_rw_handlers = LIST_HEAD_INIT(os_rw_handlers);
 static struct list_head os_signal_handlers = LIST_HEAD_INIT(os_signal_handlers);
+#endif
 static struct list_head os_timers = LIST_HEAD_INIT(os_timers);
 static uint64_t os_pending_signals;
+#ifndef LYNX_SIMPLIFY
 static int eval_script_recurse;
+#endif
+
 static int (*os_poll_func)(JSContext *ctx);
 
+#ifndef LYNX_SIMPLIFY
 static JSValue js_printf_internal(JSContext *ctx,
                                   int argc, JSValueConst *argv, FILE *fp)
 {
@@ -317,7 +324,7 @@ uint8_t *js_load_file(JSContext *ctx, size_t *pbuf_len, const char *filename)
     *pbuf_len = buf_len;
     return buf;
 }
-
+#ifndef LYNX_SIMPLIFY
 /* load and evaluate a file */
 static JSValue js_loadScript(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
@@ -342,11 +349,14 @@ static JSValue js_loadScript(JSContext *ctx, JSValueConst this_val,
     JS_FreeCString(ctx, filename);
     return ret;
 }
+#endif
+
+#endif
 
 typedef JSModuleDef *(JSInitModuleFunc)(JSContext *ctx,
                                         const char *module_name);
 
-
+#ifndef LYNX_SIMPLIFY
 #if defined(_WIN32)
 static JSModuleDef *js_module_loader_so(JSContext *ctx,
                                         const char *module_name)
@@ -1072,9 +1082,13 @@ static JSValue js_std_urlGet(JSContext *ctx, JSValueConst this_val,
 static JSClassDef js_std_file_class = {
     "FILE",
     .finalizer = js_std_file_finalizer,
-}; 
+};
+
+#endif
 
 static const JSCFunctionListEntry js_std_funcs[] = {
+
+#ifndef LYNX_SIMPLIFY
     JS_CFUNC_DEF("exit", 1, js_std_exit ),
     JS_CFUNC_DEF("gc", 0, js_std_gc ),
     JS_CFUNC_DEF("evalScript", 1, js_evalScript ),
@@ -1093,8 +1107,9 @@ static const JSCFunctionListEntry js_std_funcs[] = {
     JS_PROP_INT32_DEF("SEEK_END", SEEK_END, JS_PROP_CONFIGURABLE ),
 
     /* setenv, ... */
+#endif
 };
-
+#ifndef LYNX_SIMPLIFY
 static const JSCFunctionListEntry js_std_error_funcs[] = {
     JS_CFUNC_DEF("strerror", 1, js_std_error_strerror ),
     /* various errno values */
@@ -1131,8 +1146,11 @@ static const JSCFunctionListEntry js_std_file_proto_funcs[] = {
     /* setvbuf, ferror, clearerr, ...  */
 };
 
+#endif
+
 static int js_std_init(JSContext *ctx, JSModuleDef *m)
 {
+#ifndef LYNX_SIMPLIFY
     JSValue proto, obj;
     
     /* FILE class */
@@ -1157,6 +1175,7 @@ static int js_std_init(JSContext *ctx, JSModuleDef *m)
                                countof(js_std_error_funcs));
     JS_SetModuleExport(ctx, m, "Error", obj);
 
+#endif
     /* global object */
     JS_SetModuleExport(ctx, m, "global", JS_GetGlobalObject(ctx));
     return 0;
@@ -1169,17 +1188,19 @@ JSModuleDef *js_init_module_std(JSContext *ctx, const char *module_name)
     if (!m)
         return NULL;
     JS_AddModuleExportList(ctx, m, js_std_funcs, countof(js_std_funcs));
+#ifndef LYNX_SIMPLIFY
     JS_AddModuleExport(ctx, m, "in");
     JS_AddModuleExport(ctx, m, "out");
     JS_AddModuleExport(ctx, m, "err");
-    JS_AddModuleExport(ctx, m, "global");
     JS_AddModuleExport(ctx, m, "Error");
+#endif
+    JS_AddModuleExport(ctx, m, "global");
     return m;
 }
 
 /**********************************************************/
 /* 'os' object */
-
+#ifndef LYNX_SIMPLIFY
 static JSValue js_os_return(JSContext *ctx, ssize_t ret)
 {
     if (ret < 0)
@@ -1484,6 +1505,7 @@ static JSOSSignalHandler *find_sh(int sig_num)
     return NULL;
 }
 
+
 static void free_sh(JSRuntime *rt, JSOSSignalHandler *sh)
 {
     list_del(&sh->link);
@@ -1541,6 +1563,8 @@ static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
     }
     return JS_UNDEFINED;
 }
+
+#endif
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void)
@@ -1730,10 +1754,11 @@ static int js_os_poll(JSContext *ctx)
 {
     int ret, fd_max, min_delay;
     int64_t cur_time, delay;
-    fd_set rfds, wfds;
-    JSOSRWHandler *rh;
     struct list_head *el;
     struct timeval tv, *tvp;
+#ifndef LYNX_SIMPLIFY
+    JSOSRWHandler *rh;
+    fd_set rfds, wfds;
 
     if (unlikely(os_pending_signals != 0)) {
         JSOSSignalHandler *sh;
@@ -1749,8 +1774,9 @@ static int js_os_poll(JSContext *ctx)
             }
         }
     }
+#endif
     
-    if (list_empty(&os_rw_handlers) && list_empty(&os_timers))
+    if (/*list_empty(&os_rw_handlers) && */list_empty(&os_timers))
         return -1; /* no more events */
     
     if (!list_empty(&os_timers)) {
@@ -1781,6 +1807,7 @@ static int js_os_poll(JSContext *ctx)
         tvp = NULL;
     }
     
+#ifndef LYNX_SIMPLIFY
     FD_ZERO(&rfds);
     FD_ZERO(&wfds);
     fd_max = -1;
@@ -1811,6 +1838,7 @@ static int js_os_poll(JSContext *ctx)
             }
         }
     }
+#endif
     return 0;
 }
 #endif /* !_WIN32 */
@@ -1828,6 +1856,7 @@ static int js_os_poll(JSContext *ctx)
 #define OS_FLAG(x) JS_PROP_INT32_DEF(#x, x, JS_PROP_CONFIGURABLE )
 
 static const JSCFunctionListEntry js_os_funcs[] = {
+#ifndef LYNX_SIMPLIFY
     JS_CFUNC_DEF("open", 2, js_os_open ),
     OS_FLAG(O_RDONLY),
     OS_FLAG(O_WRONLY),
@@ -1858,16 +1887,20 @@ static const JSCFunctionListEntry js_os_funcs[] = {
     OS_FLAG(SIGILL),
     OS_FLAG(SIGSEGV),
     OS_FLAG(SIGTERM),
+#endif
     JS_CFUNC_DEF("setTimeout", 2, js_os_setTimeout ),
     JS_CFUNC_DEF("clearTimeout", 1, js_os_clearTimeout ),
+
+#ifndef LYNX_SIMPLIFY
     JS_PROP_STRING_DEF("platform", OS_PLATFORM, 0 ),
+#endif
     /* stat, readlink, opendir, closedir, ... */
 };
 
 static int js_os_init(JSContext *ctx, JSModuleDef *m)
 {
     os_poll_func = js_os_poll;
-    
+
     /* OSTimer class */
     JS_NewClassID(&js_os_timer_class_id);
     JS_NewClass(JS_GetRuntime(ctx), js_os_timer_class_id, &js_os_timer_class);
@@ -1887,6 +1920,7 @@ JSModuleDef *js_init_module_os(JSContext *ctx, const char *module_name)
 }
 
 /**********************************************************/
+
 
 static JSValue js_print(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv)
@@ -1909,7 +1943,10 @@ static JSValue js_print(JSContext *ctx, JSValueConst this_val,
 
 void js_std_add_helpers(JSContext *ctx, int argc, char **argv)
 {
-    JSValue global_obj, console, args;
+#ifndef LYNX_SIMPLIFY
+    JSValue global_obj;
+    JSValue args;
+    JSValue console;
     int i;
 
     /* XXX: should these global definitions be enumerable? */
@@ -1931,12 +1968,13 @@ void js_std_add_helpers(JSContext *ctx, int argc, char **argv)
                       JS_NewCFunction(ctx, js_print, "print", 1));
     JS_SetPropertyStr(ctx, global_obj, "__loadScript",
                       JS_NewCFunction(ctx, js_loadScript, "__loadScript", 1));
-    
     JS_FreeValue(ctx, global_obj);
 
     /* XXX: not multi-context */
     init_list_head(&os_rw_handlers);
     init_list_head(&os_signal_handlers);
+
+#endif
     init_list_head(&os_timers);
     os_pending_signals = 0;
 }
@@ -1944,7 +1982,7 @@ void js_std_add_helpers(JSContext *ctx, int argc, char **argv)
 void js_std_free_handlers(JSRuntime *rt)
 {
     struct list_head *el, *el1;
-
+#ifndef LYNX_SIMPLIFY
     list_for_each_safe(el, el1, &os_rw_handlers) {
         JSOSRWHandler *rh = list_entry(el, JSOSRWHandler, link);
         free_rw_handler(rt, rh);
@@ -1954,6 +1992,7 @@ void js_std_free_handlers(JSRuntime *rt)
         JSOSSignalHandler *sh = list_entry(el, JSOSSignalHandler, link);
         free_sh(rt, sh);
     }
+#endif
     
     list_for_each_safe(el, el1, &os_timers) {
         JSOSTimer *th = list_entry(el, JSOSTimer, link);
@@ -2008,7 +2047,7 @@ void js_std_loop(JSContext *ctx)
             break;
     }
 }
-
+#ifndef LYNX_SIMPLIFY
 void js_std_eval_binary(JSContext *ctx, const uint8_t *buf, size_t buf_len,
                         int flags)
 {
@@ -2020,3 +2059,4 @@ void js_std_eval_binary(JSContext *ctx, const uint8_t *buf, size_t buf_len,
     }
     JS_FreeValue(ctx, val);
 }
+#endif

@@ -43,6 +43,7 @@ else () # end release
 
 endif ()  #end debug
 
+add_definitions(-DLYNX_SIMPLIFY)
 
 
 SET(QuickJs "quickjs")
@@ -56,10 +57,10 @@ SET(QuickJsSrc
         ${QuickJs}/libregexp.c
         ${QuickJs}/libunicode.c
         ${QuickJs}/quickjs.c
+        ${QuickJs}/quickjs-libc.c
         # no need
 #        ${QuickJs}/jscompress.c
 #        ${QuickJs}/libbf.c
-#        ${QuickJs}/quickjs-libc.c
 #        ${QuickJs}/unicode_gen.c
 #        ${QuickJs}/run-test262.c
 #        ${QuickJs}/qjs.c
