@@ -33,7 +33,9 @@
 #include <android/log.h>
 #define DUMP_LEAKS 1
 // log
-#define printf(...) __android_log_print(ANDROID_LOG_ERROR, "LYB", __VA_ARGS__);
+#define printf(...) __android_log_print(ANDROID_LOG_ERROR, "LYNX", __VA_ARGS__);
+#define fprintf(iotype, ...) __android_log_print(ANDROID_LOG_ERROR, "LYNX", __VA_ARGS__);
+#define vfprintf(iotype, ...) __android_log_print(ANDROID_LOG_ERROR, "LYNX", __VA_ARGS__);
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)

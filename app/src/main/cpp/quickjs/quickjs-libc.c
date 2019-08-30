@@ -1936,6 +1936,7 @@ static JSValue js_print(JSContext *ctx, JSValueConst this_val,
             return JS_EXCEPTION;
         fputs(str, stdout);
         JS_FreeCString(ctx, str);
+        printf("js_print: %s", str);
     }
     putchar('\n');
     return JS_UNDEFINED;

@@ -1,11 +1,15 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
-#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "TAGLYB", __VA_ARGS__);
+#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "LYNX", __VA_ARGS__);
+#define fprintf(iotype, ...) __android_log_print(ANDROID_LOG_ERROR, "LYNX", __VA_ARGS__);
 extern "C" {
 #include "./quickjs/quickjs.h"
 #include "./quickjs/quickjs-libc.h"
 #include "./quickjs/cutils.h"
+}
+
+#include "quickjs_test.h"
 
 static JSValue testlog(JSContext *ctx, JSValueConst this_val,
                        int argc, JSValueConst *argv) {
@@ -13,26 +17,8 @@ static JSValue testlog(JSContext *ctx, JSValueConst this_val,
     return JS_UNDEFINED;
 }
 
-static int eval_buf(JSContext *ctx, const char *buf, int buf_len,
-                    const char *filename, int eval_flags) {
-    JSValue val;
-    int ret;
-
-    val = JS_Eval(ctx, buf, buf_len, filename, eval_flags);
-    if (JS_IsException(val)) {
-        js_std_dump_error(ctx);
-        ret = -1;
-    } else {
-        ret = 0;
-    }
-    __android_log_print(ANDROID_LOG_ERROR, "lyb","eval_buf=%d", ret);
-    JS_FreeValue(ctx, val);
-    return ret;
-}
 //
-
-
-int loadjs() {
+int testScript() {
 
 //  for (int i = 0; i < INT_MAX; ++i) {
 //    int* aa = (int*) malloc(sizeof(int) * 3);
@@ -108,24 +94,57 @@ int loadjs() {
     JS_FreeRuntime(rt);
     return 0;
     fail:
-//    js_std_free_handlers(rt);
     JS_FreeContext(ctx);
     JS_FreeRuntime(rt);
 
     return 1;
 }
 
-}
-
-//}
-
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_lybvinci_adapter4quickjs_MainActivity_stringFromJNI(
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeInitJSEngine(
         JNIEnv *env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
-    loadjs();
+    initJSEngine();
     return env->NewStringUTF(hello.c_str());
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeRunTest(
+        JNIEnv *env,
+        jobject /* this */,
+        jstring jsData,
+        jstring fileName) {
+//  const char* data = (char *)env->GetByteArrayElements(jsData, JNI_FALSE);
+  const char* data = (char *)env->GetStringUTFChars(jsData, JNI_FALSE);
+  const char* url = (char *)env->GetStringUTFChars(fileName, JNI_FALSE);
+//  size_t len = env->GetArrayLength(jsData);
+//  std::string stdstr(data);
+//  printf("execute data = %s", data);
+  return run_test(url, data, strlen(data));
+}
 
+extern "C" JNIEXPORT jint JNICALL
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeRunCleanTest(
+        JNIEnv *env,
+        jobject /* this */,
+        jstring jsData,
+        jstring fileName) {
+  const char* data = (char *)env->GetStringUTFChars(jsData, JNI_FALSE);
+  const char* url = (char *)env->GetStringUTFChars(fileName, JNI_FALSE);
+  return run_test_clean(url, data, strlen(data));
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeDestroy(
+        JNIEnv *env,
+        jobject /* this */) {
+  destroy();
+}
+
+extern "C" JNIEXPORT int JNICALL
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeTestScript(
+        JNIEnv *env,
+        jobject /* this */) {
+  return testScript();
+}
