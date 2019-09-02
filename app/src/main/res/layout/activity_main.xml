@@ -6,19 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_marginTop="100dp"
-        android:id="@+id/sample_text"
+    <EditText
+        android:layout_marginTop="10dp"
+        android:id="@+id/js_script"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="function fun() {return (this instanceof String);} testlogobj.testlog(fun());"
         />
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:id="@+id/run_script"
-        android:layout_below="@+id/sample_text"
+        android:layout_below="@+id/js_script"
         android:text="Run JS Script"
         android:onClick="runJSScript"
         />
@@ -56,8 +56,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_below="@+id/run_es5_test"
+        android:id="@+id/unzipes5"
         android:text="unzipES5Resource"
         android:onClick="unzipES5Resource"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/unzipes5"
+        android:id="@+id/testMemory1"
+        android:text="testMemory1个"
+        android:onClick="testMemroy1"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/testMemory1"
+        android:id="@+id/testMemory10"
+        android:text="testMemory10个"
+        android:onClick="testMemroy10"
         />
     <ProgressBar
         android:layout_width="wrap_content"

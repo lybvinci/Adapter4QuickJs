@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <vector>
 #define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "LYNX", __VA_ARGS__);
 #define fprintf(iotype, ...) __android_log_print(ANDROID_LOG_ERROR, "LYNX", __VA_ARGS__);
 extern "C" {
@@ -10,15 +11,18 @@ extern "C" {
 }
 
 #include "quickjs_test.h"
+#include "quickjs_memory_test.h"
 
 static JSValue testlog(JSContext *ctx, JSValueConst this_val,
                        int argc, JSValueConst *argv) {
-    __android_log_print(ANDROID_LOG_ERROR, "lyb123456", "testlog");
+  const char* str = JS_ToCString(ctx, argv[0]);
+  printf("testlog: %s", str);
+    JS_FreeCString(ctx, str);
     return JS_UNDEFINED;
 }
 
 //
-int testScript() {
+int testScript(const char* expr) {
 
 //  for (int i = 0; i < INT_MAX; ++i) {
 //    int* aa = (int*) malloc(sizeof(int) * 3);
@@ -33,7 +37,25 @@ int testScript() {
 //    char *expr = "var test=111;testlogobj.testlog(1);";
   //const char* expr = "var t = '*WARN*,*ERROR*'.split(/[\\s,]+/); console.log(t[0]);";
 //  const char* expr = "Promise.resolve().then(() => testlogobj.testlog(1))";
-  const char* expr = "this.setTimeout = os.setTimeout; testlogobj.testlog(1); setTimeout(function () { testlogobj.testlog(1);}, 1000);Promise.resolve().then(() => testlogobj.testlog(1));";
+//  const char* expr = "this.setTimeout = os.setTimeout; testlogobj.testlog(1); setTimeout(function () { testlogobj.testlog(1);}, 1000);Promise.resolve().then(() => testlogobj.testlog(1));";
+//    const char* expr = "throw 'Test262: This statement should not be evaluated.';";
+//    const char* expr = "throw 'Test262: This statement should not be evaluated.'; /\\P{Other_ID_Continue}/u;";
+//const  char* expr = "'use strict';\n"
+//                    "\n"
+//                    "\n"
+//                    "  var foo = function(){};\n"
+//                    "\n"
+//                    "  // Now, deleting 'foo' directly should fail throwing a ReferenceError\n"
+//                    "  // because 'foo' evaluates to a strict reference;\n"
+//                    "  try {\n"
+//                    "    delete foo;\n"
+//                    "  }\n"
+//                    "  catch (e) {\n"
+//                    " testlogobj.testlog(1);"
+//                    "    if (e instanceof ReferenceError) {\n"
+//                    "      return true;\n"
+//                    "    }\n"
+//                    "  }";
 
     rt = JS_NewRuntime();
     if (!rt) {
@@ -100,6 +122,27 @@ int testScript() {
     return 1;
 }
 
+std::vector<QuickMemoryTest*> mMemoryTestContainer;
+
+void testMemory(int count, const char* expr) {
+  for (int i = 0; i < count; i++) {
+    QuickMemoryTest* memoryTest = new QuickMemoryTest();
+    memoryTest->prepare();
+    memoryTest->run(expr);
+    mMemoryTestContainer.push_back(memoryTest);
+  }
+}
+
+void testMemoryDestroy() {
+  for (auto it = mMemoryTestContainer.begin(); it != mMemoryTestContainer.end(); it++) {
+    (*it)->destroy();
+    delete *it;
+  }
+  mMemoryTestContainer.clear();
+}
+
+
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_lybvinci_adapter4quickjs_MainActivity_nativeInitJSEngine(
         JNIEnv *env,
@@ -121,6 +164,7 @@ Java_com_lybvinci_adapter4quickjs_MainActivity_nativeRunTest(
 //  size_t len = env->GetArrayLength(jsData);
 //  std::string stdstr(data);
 //  printf("execute data = %s", data);
+//    testScript();
   return run_test(url, data, strlen(data));
 }
 
@@ -139,12 +183,24 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_lybvinci_adapter4quickjs_MainActivity_nativeDestroy(
         JNIEnv *env,
         jobject /* this */) {
-  destroy();
+  testMemoryDestroy();
 }
 
 extern "C" JNIEXPORT int JNICALL
 Java_com_lybvinci_adapter4quickjs_MainActivity_nativeTestScript(
         JNIEnv *env,
-        jobject /* this */) {
-  return testScript();
+        jobject /* this */,
+        jstring jsData) {
+    const char* data = (char *) env->GetStringUTFChars(jsData, JNI_FALSE);
+  return testScript(data);
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_lybvinci_adapter4quickjs_MainActivity_nativeTestMemory(
+        JNIEnv *env,
+        jobject /* this */,
+        jstring jsData, int count) {
+  const char* data = (char *) env->GetStringUTFChars(jsData, JNI_FALSE);
+  testMemory(count, data);
+}
+

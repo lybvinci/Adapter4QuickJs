@@ -597,7 +597,7 @@ int run_test_clean(const char *filename, const char* buf, size_t buf_len)
     exit(2);
   }
 
-  JS_SetCanBlock(rt, TRUE);
+//  JS_SetCanBlock(rt, TRUE);
   JS_SetMaxStackSize(ctx, (size_t)ULLONG_MAX);
 
   js_std_add_helpers(ctx, 0, 0);
@@ -616,7 +616,7 @@ int run_test_clean(const char *filename, const char* buf, size_t buf_len)
 
 
   add_helpers(ctx);
-  JS_EnableIsErrorProperty(ctx, TRUE);
+//  JS_EnableIsErrorProperty(ctx, TRUE);
 
 
   // execute
@@ -646,6 +646,7 @@ int run_test_clean(const char *filename, const char* buf, size_t buf_len)
                 / 1000000.0;
   fprintf(outfile, " time: %d ms\n", cost);
   free(error_type);
+  js_std_loop(ctx);
 
 #ifdef CONFIG_AGENT
   js_agent_free(ctx);

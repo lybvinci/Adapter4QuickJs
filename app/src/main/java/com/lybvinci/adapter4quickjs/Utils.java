@@ -90,4 +90,29 @@ public class Utils {
         return total.toString();
     }
 
+    public static String readAssetsFile(Context ctx, String fileName) {
+        InputStream open = null;
+        try {
+             open = ctx.getAssets().open(fileName);
+            BufferedReader r = new BufferedReader(new InputStreamReader(open));
+            StringBuilder total = new StringBuilder();
+            for (String line; (line = r.readLine()) != null; ) {
+                total.append(line).append('\n');
+            }
+            return total.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (null != open) {
+                try {
+                    open.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return "";
+
+    }
+
 }

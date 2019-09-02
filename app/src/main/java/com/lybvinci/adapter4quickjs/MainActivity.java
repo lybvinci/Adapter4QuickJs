@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
 
     private TestES5 mTestES5;
     private TestES6 mTestES6;
+    private EditText mScriptInput;
 
 
     @Override
@@ -45,8 +49,7 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Example of a call to a native method
-//        TextView tv = findViewById(R.id.sample_text);
-//        tv.setText(nativeInitJSEngine());
+        mScriptInput = findViewById(R.id.js_script);
 
         progressBar = findViewById(R.id.progress);
         mTestES5 = new TestES5(this);
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        nativeDestroy();
     }
 
 
@@ -78,7 +82,12 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
 
 
     public void runJSScript(View view) {
-        nativeTestScript();
+        String script = mScriptInput.getText().toString();
+        if (TextUtils.isEmpty(script)) {
+            Toast.makeText(this, "请输入js！", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        nativeTestScript(script);
     }
 
 
@@ -95,8 +104,9 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
 
     public native void nativeDestroy();
 
-    public native void nativeTestScript();
+    public native void nativeTestScript(String script);
 
+    public native void nativeTestMemory(String jsData, int count);
 
     @Override
     public Context getContext() {
@@ -129,4 +139,11 @@ public class MainActivity extends AppCompatActivity implements JSDelegate{
     }
 
 
+    public void testMemroy1(View view) {
+        nativeTestMemory(Utils.readAssetsFile(this,"combined.js"), 1);
+    }
+
+    public void testMemroy10(View view) {
+        nativeTestMemory(Utils.readAssetsFile(this,"testmemory.js"), 10);
+    }
 }
